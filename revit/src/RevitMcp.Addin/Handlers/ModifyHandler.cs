@@ -9,7 +9,7 @@ public static class ModifyHandler
 {
     public static List<ModifyOp> Parse(string? json) => ModifyOp.ParseAll(json);
 
-    public static CallResponse Run(Document doc, List<ModifyOp> ops, bool dryRun)
+    public static CallResponse Run(Document doc, List<ModifyOp> ops, bool dryRun, string units)
     {
         if (doc.IsReadOnly) return CallResponse.Fail("Error: the model is read-only.");
         var log = new StringBuilder();
@@ -27,7 +27,7 @@ public static class ModifyHandler
         {
             try
             {
-                log.Append($"{i}: ").Append(Apply(doc, ops[i])).Append('\n');
+                log.Append($"{i}: ").Append(Apply(doc, ops[i], units)).Append('\n');
             }
             catch (Exception ex) when (ex is ArgumentException or InvalidOperationException
                                         or Autodesk.Revit.Exceptions.ApplicationException)
@@ -61,7 +61,7 @@ public static class ModifyHandler
     private static string Describe(List<ModifyOp> ops) =>
         ops.Count == 1 ? $"{ops[0].Op} {ops[0].Ids.Count} element(s)" : $"{ops.Count} changes";
 
-    private static string Apply(Document doc, ModifyOp op)
+    private static string Apply(Document doc, ModifyOp op, string units)
     {
         var ids = op.Ids.Select(i => new ElementId(i)).ToList();
         var missing = ids.Where(id => doc.GetElement(id) == null).Select(id => id.Value).ToList();
@@ -75,11 +75,12 @@ public static class ModifyHandler
                 return $"set {op.Param}={text} on {ids.Count}";
 
             case "move":
-                ElementTransformUtils.MoveElements(doc, ids, Vec(op.By!));
-                return $"moved {ids.Count} by {string.Join(",", op.By!)} mm";
+                var move = Lengths.Vector(doc, op.By!, units);
+                ElementTransformUtils.MoveElements(doc, ids, move);
+                return $"moved {ids.Count} by {Elements.Point(doc, move)}";
 
             case "copy":
-                var copies = ElementTransformUtils.CopyElements(doc, ids, Vec(op.By!));
+                var copies = ElementTransformUtils.CopyElements(doc, ids, Lengths.Vector(doc, op.By!, units));
                 return $"copied {ids.Count}, new ids {string.Join(",", copies.Select(c => c.Value).Take(50))}";
 
             case "rotate":
@@ -108,9 +109,6 @@ public static class ModifyHandler
                 throw new ArgumentException("unknown op");
         }
     }
-
-    private static XYZ Vec(double[] mm) =>
-        new(Elements.FromMm(mm[0]), Elements.FromMm(mm[1]), mm.Length > 2 ? Elements.FromMm(mm[2]) : 0);
 
     private static XYZ? Center(Element e) => e.Location switch
     {

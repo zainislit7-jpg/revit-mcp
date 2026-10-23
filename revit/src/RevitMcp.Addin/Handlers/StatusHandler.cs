@@ -25,7 +25,7 @@ public static class StatusHandler
         sb.Append($"Model: {doc.Title}{(doc.IsModified ? " (unsaved changes)" : "")}");
         if (doc.IsWorkshared) sb.Append(" workshared");
         if (doc.IsFamilyDocument) sb.Append(" family");
-        sb.Append($"\nLength units: {Elements.LengthUnit(doc)} (modify lengths are always mm)\n");
+        sb.Append($"\nLength units: {Elements.LengthUnit(doc)} (modify reads plain numbers in these, or text like 2'-6\")\n");
 
         var v = doc.ActiveView;
         sb.Append($"Active view: {v.Name} [{v.ViewType}] id {v.Id.Value}\n");
