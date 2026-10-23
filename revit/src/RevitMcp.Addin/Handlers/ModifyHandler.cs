@@ -59,10 +59,17 @@ public static class ModifyHandler
     }
 
     private static string Describe(List<ModifyOp> ops) =>
-        ops.Count == 1 ? $"{ops[0].Op} {ops[0].Ids.Count} element(s)" : $"{ops.Count} changes";
+        ops.Count switch
+        {
+            1 when ops[0].IsCreate => $"create {ops[0].Op}",
+            1 => $"{ops[0].Op} {ops[0].Ids.Count} element(s)",
+            _ => $"{ops.Count} changes",
+        };
 
     private static string Apply(Document doc, ModifyOp op, string units)
     {
+        if (op.IsCreate) return CreateOps.Apply(doc, op, units);
+
         var ids = op.Ids.Select(i => new ElementId(i)).ToList();
         var missing = ids.Where(id => doc.GetElement(id) == null).Select(id => id.Value).ToList();
         if (missing.Count > 0) throw new ArgumentException("not found: " + string.Join(",", missing.Take(10)));

@@ -23,7 +23,7 @@ Claude ──stdio/MCP──▶ RevitMcp.Bridge ──HTTP 127.0.0.1 + token─�
 | `revit_query` | `mode=summary` counts per category; `mode=list` paged rows of one category with `fields`, `filter`, `scope`; `mode=get` all parameters of `ids`. |
 | `revit_view` | `screenshot` (PNG, 768 px default), `activate`, `select`, `zoom`. |
 | `revit_export` | `csv`, `schedule`, `pdf`, `dwg`, `image` to a file; returns only the path and a count. |
-| `revit_modify` | `ops` JSON array (set, move, copy, rotate, type, delete, pin, unpin). One transaction = one undo. `dry_run` defaults to true. Lengths are plain numbers in the model's units (or `units=ft/in/mm/cm/m`), or text Revit parses, like `2'-6"` or `1500 mm`. |
+| `revit_modify` | `ops` JSON array. Edit: set, move, copy, rotate, type, delete, pin, unpin. Create: wall, floor, door, window, room, level. One transaction = one undo. `dry_run` defaults to true. Lengths are plain numbers in the model's units (or `units=ft/in/mm/cm/m`), or text Revit parses, like `2'-6"` or `1500 mm`. |
 | `revit_run_script` | C# against the Revit API (Roslyn). Loop and filter inside Revit, return only the answer. Rolled back unless `commit=true`. |
 
 `revit_modify` and `revit_run_script` are only listed when enabled in the config.

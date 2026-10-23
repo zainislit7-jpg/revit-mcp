@@ -90,7 +90,8 @@ public static class WriteTools
     [Description("""
         Change the model. ops is a JSON array; the whole array is one undo step. dry_run (default true) applies then rolls back, so check its report before running for real.
         Lengths: numbers in units (default: the model's own, e.g. feet), or text like "2'-6\"" or "1500 mm".
-        Ops: {"op":"set","ids":[1],"param":"Mark","value":"A1"} value as typed in Revit | {"op":"move","ids":[1],"by":[x,y,z]} | {"op":"copy","ids":[1],"by":[x,y,z]} | {"op":"rotate","ids":[1],"deg":90} about each element's center | {"op":"type","ids":[1],"to":"type id or name"} | {"op":"delete","ids":[1]} | {"op":"pin"|"unpin","ids":[1]}
+        Edit: {"op":"set","ids":[1],"param":"Mark","value":"A1"} value as typed in Revit | {"op":"move"|"copy","ids":[1],"by":[x,y]} | {"op":"rotate","ids":[1],"deg":90} | {"op":"type","ids":[1],"to":"type name"} | {"op":"delete"|"pin"|"unpin","ids":[1]}
+        Create (level defaults to the active plan's; type to the model default; result lists new ids): {"op":"wall","path":[[0,0],[25,0],[25,45],[0,45]],"closed":true,"type":"Generic - 8\"","height":"10'"} | {"op":"floor","path":[[0,0],[25,0],[25,45],[0,45]]} | {"op":"door"|"window","at":[x,y],"type":"36\" x 84\"","sill":"3'"} snaps to the nearest wall, or give "wall":id | {"op":"room","at":[x,y],"name":"Kitchen","number":"101"} inside closed walls | {"op":"level","elevation":"10'","name":"L2"} also makes its floor plan
         """)]
     public static Task<CallToolResult> Modify(
         CancellationToken ct,

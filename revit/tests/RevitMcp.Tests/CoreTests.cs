@@ -177,6 +177,34 @@ public class ModifyOpTests
     public void UnknownUnitsRejected() =>
         Assert.Throws<ArgumentException>(() => ModifyOp.ParseUnits("cubits"));
 
+    [Fact]
+    public void CreateOpsNeedNoIds()
+    {
+        var ops = ModifyOp.ParseAll("""
+            [{"op":"wall","path":[[0,0],[25,0],[25,45],[0,45]],"closed":true,"type":"Generic - 8\"","height":"10'"},
+             {"op":"floor","path":[[0,0],[25,0],[25,45]]},
+             {"op":"door","at":[12.5,0],"type":"36\" x 84\""},
+             {"op":"window","at":["25'","20'"],"sill":"3'","wall":42},
+             {"op":"room","at":[10,10],"name":"Lounge","number":"101"},
+             {"op":"level","elevation":"10'","name":"L2"}]
+            """);
+        Assert.All(ops, o => Assert.True(o.IsCreate));
+        Assert.Equal("Generic - 8\"", ops[0].TypeName);
+        Assert.True(ops[0].Closed);
+        Assert.Equal(42, ops[3].Wall);
+        Assert.Equal("Lounge", ops[4].Name);
+    }
+
+    [Theory]
+    [InlineData("""[{"op":"wall","path":[[0,0]]}]""", "at least 2 points")]
+    [InlineData("""[{"op":"floor","path":[[0,0],[1,0]]}]""", "at least 3 corners")]
+    [InlineData("""[{"op":"door"}]""", "needs at=")]
+    [InlineData("""[{"op":"room","at":[1]}]""", "needs at=")]
+    [InlineData("""[{"op":"level"}]""", "needs elevation")]
+    [InlineData("""[{"op":"wall","path":[[0,0],[1,0]],"height":true}]""", "height must be")]
+    public void RejectsBadCreateOps(string json, string message) =>
+        Assert.Contains(message, Assert.Throws<ArgumentException>(() => ModifyOp.ParseAll(json)).Message);
+
     [Theory]
     [InlineData("""[{"op":"move","ids":[1],"by":["", 0]}]""", "needs by=")]
     [InlineData("""[{"op":"move","ids":[1],"by":[true, 0]}]""", "needs by=")]
