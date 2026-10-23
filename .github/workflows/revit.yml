@@ -1,0 +1,19 @@
+name: revit
+on:
+  push:
+    paths: ['revit/**', '.github/workflows/revit.yml']
+  pull_request:
+    paths: ['revit/**', '.github/workflows/revit.yml']
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: revit
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet build -c Release
+      - run: dotnet test -c Release --no-build

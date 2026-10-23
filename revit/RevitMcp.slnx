@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/RevitMcp.Addin/RevitMcp.Addin.csproj" />
+    <Project Path="src/RevitMcp.Bridge/RevitMcp.Bridge.csproj" />
+    <Project Path="src/RevitMcp.Core/RevitMcp.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/RevitMcp.Tests/RevitMcp.Tests.csproj" />
+  </Folder>
+</Solution>

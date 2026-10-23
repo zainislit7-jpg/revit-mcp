@@ -1,0 +1,260 @@
+[
+  {
+    "name": "revit_export",
+    "description": "Write data to a file and return only its path and a count. Use for anything bigger than a page. csv: query rows (same args as revit_query list). schedule: a schedule view to csv. pdf|dwg: views or sheets. image: full-size PNG.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "description": "csv|schedule|pdf|dwg|image",
+          "type": "string"
+        },
+        "category": {
+          "description": "csv: category to export",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "types": {
+          "description": "csv: true = types",
+          "type": "boolean",
+          "default": false
+        },
+        "filter": {
+          "description": "csv: filter, as in revit_query",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "fields": {
+          "description": "csv: comma list of columns",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "scope": {
+          "description": "csv: model|view|selection",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "views": {
+          "description": "schedule/pdf/dwg/image: comma list of view or sheet ids or names",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "path": {
+          "description": "Output folder or file path (default Documents\\ClaudeMcp\\exports)",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "idempotentHint": true
+    }
+  },
+  {
+    "name": "revit_modify",
+    "description": "Change the model. ops is a JSON array; the whole array is one undo step. dry_run (default true) applies then rolls back, so check its report before running for real.\nOps (lengths in mm): {\u0022op\u0022:\u0022set\u0022,\u0022ids\u0022:[1],\u0022param\u0022:\u0022Mark\u0022,\u0022value\u0022:\u0022A1\u0022} value as typed in Revit | {\u0022op\u0022:\u0022move\u0022,\u0022ids\u0022:[1],\u0022by\u0022:[x,y,z]} | {\u0022op\u0022:\u0022copy\u0022,\u0022ids\u0022:[1],\u0022by\u0022:[x,y,z]} | {\u0022op\u0022:\u0022rotate\u0022,\u0022ids\u0022:[1],\u0022deg\u0022:90} about each element\u0027s center | {\u0022op\u0022:\u0022type\u0022,\u0022ids\u0022:[1],\u0022to\u0022:\u0022type id or name\u0022} | {\u0022op\u0022:\u0022delete\u0022,\u0022ids\u0022:[1]} | {\u0022op\u0022:\u0022pin\u0022|\u0022unpin\u0022,\u0022ids\u0022:[1]}",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "ops": {
+          "description": "JSON array of ops",
+          "type": "string"
+        },
+        "dry_run": {
+          "description": "default true",
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "required": [
+        "ops"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": true
+    }
+  },
+  {
+    "name": "revit_query",
+    "description": "Read model data as a pipe table. mode=summary: counts per category (start here). mode=list: rows of one category, paged. mode=get: every parameter of the given ids. Ask only for the fields you need.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "description": "summary|list|get (default summary)",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "category": {
+          "description": "Category name, e.g. Walls, Doors, Rooms, Sheets, Views, Levels",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "types": {
+          "description": "true = element types instead of instances",
+          "type": "boolean",
+          "default": false
+        },
+        "filter": {
+          "description": "AND-ed clauses: Field=Value; Field~text; Field\u003Enum. e.g. Level=Level 1; Width\u003E900",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "fields": {
+          "description": "Comma list of columns (any parameter name). Default per category",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "ids": {
+          "description": "Comma list of element ids (get, or restrict list)",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "scope": {
+          "description": "model|view|selection (default model)",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "limit": {
+          "description": "Rows per page, default 50, max 500",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "default": null
+        },
+        "cursor": {
+          "description": "Value of next: from the previous page",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        }
+      }
+    },
+    "annotations": {
+      "idempotentHint": true,
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "revit_run_script",
+    "description": "Run C# against the Revit API when other tools can\u0027t. Globals: doc, uidoc, app, Print(object). Return a value or Print; do the looping and filtering in the script and return only a short result. Runs inside one open transaction: don\u0027t start your own. Rolled back unless commit=true (needs writes enabled).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "description": "C# script body",
+          "type": "string"
+        },
+        "commit": {
+          "description": "Keep changes as one undo step, default false",
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "required": [
+        "code"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": true
+    }
+  },
+  {
+    "name": "revit_status",
+    "description": "Revit version, open models, active view, selection, and whether modify/run_script are enabled. Call once first.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    },
+    "annotations": {
+      "idempotentHint": true,
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "revit_view",
+    "description": "See and drive the UI. screenshot: PNG of a view. activate: open a view. select: select ids. zoom: zoom to ids.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "description": "screenshot|activate|select|zoom (default screenshot)",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "view": {
+          "description": "View id or exact name (default active view)",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "ids": {
+          "description": "Comma list of element ids (select, zoom)",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "width": {
+          "description": "Screenshot width px, default 768, max 1600",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "default": null
+        }
+      }
+    },
+    "annotations": {
+      "idempotentHint": true
+    }
+  }
+]
