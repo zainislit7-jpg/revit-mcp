@@ -11,8 +11,15 @@ public sealed class Router(Dispatcher dispatcher)
     private static readonly TimeSpan Short = TimeSpan.FromMinutes(2);
     private static readonly TimeSpan Long = TimeSpan.FromMinutes(10);
 
+    public static int Calls;
+    public static DateTime? LastCall;
+    public static string? LastTool;
+
     public async Task<CallResponse> Handle(CallRequest req)
     {
+        Interlocked.Increment(ref Calls);
+        LastCall = DateTime.Now;
+        LastTool = req.Tool;
         // Re-read each call so flipping allowWrite takes effect without restarting Revit.
         var config = McpConfig.Load();
         var args = new Args(req.Args);
