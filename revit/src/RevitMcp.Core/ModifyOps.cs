@@ -14,7 +14,24 @@ public sealed class ModifyOp
     [JsonPropertyName("deg")] public double? Deg { get; set; }
     [JsonPropertyName("to")] public JsonElement? To { get; set; }
 
-    public static readonly string[] Known = ["set", "move", "copy", "rotate", "type", "delete", "pin", "unpin"];
+    // Create ops.
+    [JsonPropertyName("path")] public JsonElement[][]? Path { get; set; }
+    [JsonPropertyName("closed")] public bool Closed { get; set; }
+    [JsonPropertyName("at")] public JsonElement[]? At { get; set; }
+    [JsonPropertyName("type")] public string? TypeName { get; set; }
+    [JsonPropertyName("level")] public string? Level { get; set; }
+    [JsonPropertyName("height")] public JsonElement? Height { get; set; }
+    [JsonPropertyName("sill")] public JsonElement? Sill { get; set; }
+    [JsonPropertyName("elevation")] public JsonElement? Elevation { get; set; }
+    [JsonPropertyName("wall")] public long? Wall { get; set; }
+    [JsonPropertyName("name")] public string? Name { get; set; }
+    [JsonPropertyName("number")] public string? Number { get; set; }
+
+    public static readonly string[] Edits = ["set", "move", "copy", "rotate", "type", "delete", "pin", "unpin"];
+    public static readonly string[] Creates = ["wall", "floor", "door", "window", "room", "level"];
+    public static readonly string[] Known = [.. Edits, .. Creates];
+
+    public bool IsCreate => Creates.Contains(Op);
 
     public const int MaxOps = 200;
     public const int MaxIds = 5000;
@@ -44,7 +61,7 @@ public sealed class ModifyOp
             o.Op = o.Op.Trim().ToLowerInvariant();
             var where = $"ops[{i}] ({o.Op})";
             if (!Known.Contains(o.Op)) throw new ArgumentException($"{where}: unknown op. Use {string.Join(", ", Known)}.");
-            if (o.Ids.Count == 0) throw new ArgumentException($"{where}: ids is empty.");
+            if (!o.IsCreate && o.Ids.Count == 0) throw new ArgumentException($"{where}: ids is empty.");
             if (o.Ids.Count > MaxIds) throw new ArgumentException($"{where}: at most {MaxIds} ids.");
             switch (o.Op)
             {
@@ -56,12 +73,24 @@ public sealed class ModifyOp
                     throw new ArgumentException($"{where}: needs deg.");
                 case "type" when o.To is null:
                     throw new ArgumentException($"{where}: needs to (type id or name).");
+                case "wall" when o.Path is not { Length: >= 2 } || !o.Path.All(IsPoint):
+                    throw new ArgumentException($"{where}: needs path=[[x,y],[x,y],...] with at least 2 points.");
+                case "floor" when o.Path is not { Length: >= 3 } || !o.Path.All(IsPoint):
+                    throw new ArgumentException($"{where}: needs path=[[x,y],...] with at least 3 corners.");
+                case "door" or "window" or "room" when o.At is null || !IsPoint(o.At):
+                    throw new ArgumentException($"{where}: needs at=[x,y].");
+                case "level" when o.Elevation is not { } e || !IsLength(e):
+                    throw new ArgumentException($"{where}: needs elevation.");
             }
+            foreach (var (len, name) in new[] { (o.Height, "height"), (o.Sill, "sill") })
+                if (len is { } l && !IsLength(l)) throw new ArgumentException($"{where}: {name} must be a number or text like \"10'\".");
         }
         return ops;
     }
 
-    private static bool IsLength(JsonElement v) =>
+    private static bool IsPoint(JsonElement[] p) => p.Length is 2 or 3 && p.All(IsLength);
+
+    public static bool IsLength(JsonElement v) =>
         v.ValueKind == JsonValueKind.Number
         || (v.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(v.GetString()));
 
