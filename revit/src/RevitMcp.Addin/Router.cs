@@ -39,7 +39,8 @@ public sealed class Router(Dispatcher dispatcher)
                     var dryRun = args.Bool("dry_run", true);
                     if (!dryRun && !config.AllowWrite) return CallResponse.Fail(WriteOff);
                     var ops = ModifyHandler.Parse(args.Str("ops"));
-                    return await dispatcher.Run(app => ModifyHandler.Run(Doc(app), ops, dryRun), Long);
+                    var units = ModifyOp.ParseUnits(args.Str("units"));
+                    return await dispatcher.Run(app => ModifyHandler.Run(Doc(app), ops, dryRun, units), Long);
                 case "run_script":
                     if (!config.AllowScripts) return CallResponse.Fail(ScriptsOff);
                     var commit = args.Bool("commit", false);

@@ -145,7 +145,7 @@ public class ModifyOpTests
         var ops = ModifyOp.ParseAll("""[{"op":"SET","ids":[1,2],"param":"Mark","value":"A1"},{"op":"move","ids":[3],"by":[100,0]}]""");
         Assert.Equal("set", ops[0].Op);
         Assert.Equal("A1", ModifyOp.Text(ops[0].Value));
-        Assert.Equal([100.0, 0.0], ops[1].By);
+        Assert.Equal([100.0, 0.0], ops[1].By!.Select(b => b.GetDouble()));
     }
 
     [Fact]
@@ -156,7 +156,30 @@ public class ModifyOpTests
     public void NumberValuesKeepTheirText() =>
         Assert.Equal("2400", ModifyOp.Text(ModifyOp.ParseAll("""[{"op":"set","ids":[1],"param":"Height","value":2400}]""")[0].Value));
 
+    [Fact]
+    public void ByAcceptsFeetAndInchText()
+    {
+        var by = ModifyOp.ParseAll("""[{"op":"move","ids":[1],"by":["2'-6\"", "1500 mm", 0]}]""")[0].By!;
+        Assert.Equal("2'-6\"", by[0].GetString());
+        Assert.Equal("1500 mm", by[1].GetString());
+    }
+
     [Theory]
+    [InlineData(null, "project")]
+    [InlineData("FT", "ft")]
+    [InlineData("feet", "ft")]
+    [InlineData("inches", "in")]
+    [InlineData("metres", "m")]
+    [InlineData("mm", "mm")]
+    public void UnitsNormalise(string? input, string expected) => Assert.Equal(expected, ModifyOp.ParseUnits(input));
+
+    [Fact]
+    public void UnknownUnitsRejected() =>
+        Assert.Throws<ArgumentException>(() => ModifyOp.ParseUnits("cubits"));
+
+    [Theory]
+    [InlineData("""[{"op":"move","ids":[1],"by":["", 0]}]""", "needs by=")]
+    [InlineData("""[{"op":"move","ids":[1],"by":[true, 0]}]""", "needs by=")]
     [InlineData("""[{"op":"explode","ids":[1]}]""", "unknown op")]
     [InlineData("""[{"op":"delete","ids":[]}]""", "ids is empty")]
     [InlineData("""[{"op":"set","ids":[1],"param":"Mark"}]""", "needs param and value")]

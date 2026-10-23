@@ -73,7 +73,7 @@
   },
   {
     "name": "revit_modify",
-    "description": "Change the model. ops is a JSON array; the whole array is one undo step. dry_run (default true) applies then rolls back, so check its report before running for real.\nOps (lengths in mm): {\u0022op\u0022:\u0022set\u0022,\u0022ids\u0022:[1],\u0022param\u0022:\u0022Mark\u0022,\u0022value\u0022:\u0022A1\u0022} value as typed in Revit | {\u0022op\u0022:\u0022move\u0022,\u0022ids\u0022:[1],\u0022by\u0022:[x,y,z]} | {\u0022op\u0022:\u0022copy\u0022,\u0022ids\u0022:[1],\u0022by\u0022:[x,y,z]} | {\u0022op\u0022:\u0022rotate\u0022,\u0022ids\u0022:[1],\u0022deg\u0022:90} about each element\u0027s center | {\u0022op\u0022:\u0022type\u0022,\u0022ids\u0022:[1],\u0022to\u0022:\u0022type id or name\u0022} | {\u0022op\u0022:\u0022delete\u0022,\u0022ids\u0022:[1]} | {\u0022op\u0022:\u0022pin\u0022|\u0022unpin\u0022,\u0022ids\u0022:[1]}",
+    "description": "Change the model. ops is a JSON array; the whole array is one undo step. dry_run (default true) applies then rolls back, so check its report before running for real.\nLengths: numbers in units (default: the model\u0027s own, e.g. feet), or text like \u00222\u0027-6\\\u0022\u0022 or \u00221500 mm\u0022.\nOps: {\u0022op\u0022:\u0022set\u0022,\u0022ids\u0022:[1],\u0022param\u0022:\u0022Mark\u0022,\u0022value\u0022:\u0022A1\u0022} value as typed in Revit | {\u0022op\u0022:\u0022move\u0022,\u0022ids\u0022:[1],\u0022by\u0022:[x,y,z]} | {\u0022op\u0022:\u0022copy\u0022,\u0022ids\u0022:[1],\u0022by\u0022:[x,y,z]} | {\u0022op\u0022:\u0022rotate\u0022,\u0022ids\u0022:[1],\u0022deg\u0022:90} about each element\u0027s center | {\u0022op\u0022:\u0022type\u0022,\u0022ids\u0022:[1],\u0022to\u0022:\u0022type id or name\u0022} | {\u0022op\u0022:\u0022delete\u0022,\u0022ids\u0022:[1]} | {\u0022op\u0022:\u0022pin\u0022|\u0022unpin\u0022,\u0022ids\u0022:[1]}",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -85,6 +85,14 @@
           "description": "default true",
           "type": "boolean",
           "default": true
+        },
+        "units": {
+          "description": "project|ft|in|mm|cm|m for plain numbers (default project)",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
         }
       },
       "required": [

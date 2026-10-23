@@ -145,16 +145,17 @@ public static class Elements
 
     private static string? Location(Element e) => e.Location switch
     {
-        LocationPoint lp => Mm(lp.Point),
-        LocationCurve lc => Mm(lc.Curve.GetEndPoint(0)) + " > " + Mm(lc.Curve.GetEndPoint(1)),
+        LocationPoint lp => Point(e.Document, lp.Point),
+        LocationCurve lc => Point(e.Document, lc.Curve.GetEndPoint(0)) + " > " + Point(e.Document, lc.Curve.GetEndPoint(1)),
         _ => null,
     };
 
-    public static string Mm(XYZ p) =>
-        $"{Table.Num(ToMm(p.X))},{Table.Num(ToMm(p.Y))},{Table.Num(ToMm(p.Z))}";
+    /// <summary>A point or offset in the model's display units, e.g. (12' 6", 4' 0", 0' 0").</summary>
+    public static string Point(Document doc, XYZ p) =>
+        $"({Length(doc, p.X)}, {Length(doc, p.Y)}, {Length(doc, p.Z)})";
 
-    public static double ToMm(double feet) => UnitUtils.ConvertFromInternalUnits(feet, UnitTypeId.Millimeters);
-    public static double FromMm(double mm) => UnitUtils.ConvertToInternalUnits(mm, UnitTypeId.Millimeters);
+    public static string Length(Document doc, double feet) =>
+        UnitFormatUtils.Format(doc.GetUnits(), SpecTypeId.Length, feet, false);
 
     /// <summary>All parameters of an element (instance, then type with a "type." prefix), values only.</summary>
     public static Row AllParameters(Element e)

@@ -89,13 +89,15 @@ public static class WriteTools
     [McpServerTool(Name = "revit_modify", Destructive = true)]
     [Description("""
         Change the model. ops is a JSON array; the whole array is one undo step. dry_run (default true) applies then rolls back, so check its report before running for real.
-        Ops (lengths in mm): {"op":"set","ids":[1],"param":"Mark","value":"A1"} value as typed in Revit | {"op":"move","ids":[1],"by":[x,y,z]} | {"op":"copy","ids":[1],"by":[x,y,z]} | {"op":"rotate","ids":[1],"deg":90} about each element's center | {"op":"type","ids":[1],"to":"type id or name"} | {"op":"delete","ids":[1]} | {"op":"pin"|"unpin","ids":[1]}
+        Lengths: numbers in units (default: the model's own, e.g. feet), or text like "2'-6\"" or "1500 mm".
+        Ops: {"op":"set","ids":[1],"param":"Mark","value":"A1"} value as typed in Revit | {"op":"move","ids":[1],"by":[x,y,z]} | {"op":"copy","ids":[1],"by":[x,y,z]} | {"op":"rotate","ids":[1],"deg":90} about each element's center | {"op":"type","ids":[1],"to":"type id or name"} | {"op":"delete","ids":[1]} | {"op":"pin"|"unpin","ids":[1]}
         """)]
     public static Task<CallToolResult> Modify(
         CancellationToken ct,
         [Description("JSON array of ops")] string ops,
-        [Description("default true")] bool dry_run = true) =>
-        Forward.Call("modify", ct, ("ops", ops), ("dry_run", dry_run));
+        [Description("default true")] bool dry_run = true,
+        [Description("project|ft|in|mm|cm|m for plain numbers (default project)")] string? units = null) =>
+        Forward.Call("modify", ct, ("ops", ops), ("dry_run", dry_run), ("units", units));
 }
 
 [McpServerToolType]
