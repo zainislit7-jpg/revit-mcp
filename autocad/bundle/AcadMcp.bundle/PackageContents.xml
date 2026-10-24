@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Autoloader manifest: AutoCAD loads the add-in at startup from %APPDATA%\Autodesk\ApplicationPlugins\AcadMcp.bundle -->
+<ApplicationPackage SchemaVersion="1.0" AutodeskProduct="AutoCAD" ProductType="Application"
+                    Name="AcadMcp" AppVersion="0.1.0" Description="Lets Claude read and edit drawings through MCP (localhost only)."
+                    Author="zain" ProductCode="{6E1D2F0B-4C1A-4B7E-9C2D-AC4D2027C1A1}" UpgradeCode="{9B3A7C55-1F3E-4D2B-8A61-AC4D2027C1A2}">
+  <CompanyDetails Name="zain" />
+  <RuntimeRequirements OS="Win64" Platform="AutoCAD*" SeriesMin="R26.0" SeriesMax="R26.9" />
+  <Components Description="AutoCAD 2027">
+    <RuntimeRequirements OS="Win64" Platform="AutoCAD*" SeriesMin="R26.0" SeriesMax="R26.9" />
+    <ComponentEntry AppName="AcadMcp" ModuleName="./Contents/AcadMcp.Addin.dll" AppDescription="Claude MCP bridge for AutoCAD"
+                    LoadOnAutoCADStartup="True" LoadOnCommandInvocation="False">
+      <Commands GroupName="ACADMCP">
+        <Command Global="CLAUDEMCP" Local="CLAUDEMCP" />
+        <Command Global="CLAUDEMCPRESTART" Local="CLAUDEMCPRESTART" />
+      </Commands>
+    </ComponentEntry>
+  </Components>
+</ApplicationPackage>

@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AcadMcp.Addin/AcadMcp.Addin.csproj" />
+    <Project Path="src/AcadMcp.Bridge/AcadMcp.Bridge.csproj" />
+    <Project Path="src/AcadMcp.Core/AcadMcp.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AcadMcp.Tests/AcadMcp.Tests.csproj" />
+  </Folder>
+</Solution>
